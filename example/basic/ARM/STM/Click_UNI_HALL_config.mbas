@@ -1,0 +1,5 @@
+module Click_UNI_HALL_config
+
+include Click_UNI_HALL_types
+
+end.

@@ -1,0 +1,5 @@
+unit Click_UNI_HALL_config;
+
+uses Click_UNI_HALL_types;
+
+end.

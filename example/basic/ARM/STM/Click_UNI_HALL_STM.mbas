@@ -1,0 +1,87 @@
+'
+'Example for UNI_HALL Click
+'
+'    Date          : Oct 2018.
+'    Author        : Nenad Filipovic
+'
+'Test configuration STM32 :
+'    
+'    MCU              : STM32F107VCT6
+'    Dev. Board       : EasyMx PRO v7 for STM32
+'    ARM Compiler ver : v6.0.0.0
+'
+'---
+'
+'Description :
+'
+'The application is composed of three sections :
+'
+'- System Initialization - Initializes GPIO and LOG, set INT pin as input.
+'- Application Initialization - Initialization driver enable's - GPIO and start write log.
+'- Application Task - (code snippet) This is a example which demonstrates the use of UNI HALL Click board.
+'     Detect the north pole magnetic fields near the UNI HALL Click.
+'     Results are being sent to the Usart Terminal where you can track their changes.
+'     All data logs on usb uart when magnetic field is detected.
+'
+'Additional Functions :
+'
+'- UART
+'
+'
+'
+program Click_UNI_HALL_STM
+
+include Click_UNI_HALL_types
+include Click_UNI_HALL_config
+
+dim
+    unihallState as uint8_t 
+    unihallStateOld as uint8_t 
+    
+sub procedure systemInit() 
+
+    mikrobus_gpioInit(_MIKROBUS1, _MIKROBUS_INT_PIN, _GPIO_INPUT) 
+    mikrobus_logInit(_MIKROBUS2, 9600) 
+    Delay_100ms() 
+
+end sub
+
+sub procedure applicationInit() 
+
+    unihall_gpioDriverInit(T_UNIHALL_P(@_MIKROBUS1_GPIO)) 
+    mikrobus_logWrite("---------------------------", _LOG_LINE) 
+    mikrobus_logWrite("       Initialization      ", _LOG_LINE) 
+    mikrobus_logWrite("---------------------------", _LOG_LINE) 
+    mikrobus_logWrite(" Detecting magnetic fields ", _LOG_LINE) 
+    mikrobus_logWrite("---------------------------", _LOG_LINE) 
+    Delay_100ms() 
+
+end sub
+
+sub procedure applicationTask() 
+
+    unihallState = unihall_detectingMagneticFields() 
+    if (((unihallState = 1) and (unihallStateOld = 0))) then 
+        unihallStateOld = 1 
+        mikrobus_logWrite("      ~ NOT DETECTED ~     ", _LOG_LINE) 
+        mikrobus_logWrite("", _LOG_LINE) 
+    end if
+    if (((unihallState = 0) and (unihallStateOld = 1))) then 
+        mikrobus_logWrite("        ~ DETECTED ~       ", _LOG_LINE) 
+        mikrobus_logWrite("", _LOG_LINE) 
+        unihallStateOld = 0 
+    end if
+
+end sub
+
+main :
+    unihallState = 0
+    unihallStateOld = 0
+
+    systemInit() 
+    applicationInit() 
+    while (1) 
+        applicationTask() 
+    wend
+
+end.
